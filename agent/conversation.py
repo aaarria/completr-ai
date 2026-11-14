@@ -89,12 +89,12 @@ def run_agent(candidate_id: str) -> int:
     session = Session(api, record, audit)
     _print_banner(session)
 
-    if session.all_valid():
-        result = session.mark_already_complete()
+    decision = session.begin()
+    if not decision.get("chat"):
         print(session.closing_line, flush=True)
         audit.say("agent", session.closing_line)
         api.close()
-        return 0 if result.get("ok") else 1
+        return 0 if decision.get("ok") else 1
 
     greeting = session.greeting()
     print(f"Completr: {greeting}", flush=True)

@@ -32,6 +32,7 @@ from services.validation import (
 )
 
 TERMINAL_STATUSES = {"completed", "in_progress", "no_answer", "refused", "needs_human"}
+ALREADY_COMPLETED_MESSAGE = "Application already completed. No conversation needed."
 
 
 class ExtractionItem(BaseModel):
@@ -93,9 +94,54 @@ class Session:
         self.original_notes = str(record.get("notes") or "").strip()
         self.attempt_count = _attempt(record.get("attempt_count"))
         self.last_candidate_text = ""
+        self.evidence: list[dict[str, str]] = []
+        self.saved_fields: list[str] = []
+        self.last_save = ""
 
     def all_valid(self) -> bool:
         return all_mandatory_valid(self.assessments)
+
+    def api_status(self) -> str:
+        """Status stored by Prodigal. Field validity does not change this value."""
+        return str(self.record.get("collection_status") or "")
+
+    def begin(self) -> dict[str, Any]:
+        """Open a chat only for an unfinished pending or in-progress record.
+
+        A pending record whose mandatory fields are already valid is completed
+        through the normal save and fresh GET. No other stored status is replaced.
+        """
+        status = self.api_status()
+        if status == "completed":
+            self.outcome = "completed"
+            self.stop = True
+            self.closing_line = ALREADY_COMPLETED_MESSAGE
+            self.audit.event("decision", {"action": "skip_conversation", "reason": "api status completed"})
+            self.audit.finish("completed")
+            return {"ok": True, "chat": False, "updated": False, "outcome": "completed"}
+        if status == "pending" and self.all_valid():
+            result = self.mark_already_complete()
+            result["chat"] = False
+            return result
+        if status in {"pending", "in_progress"} and not self.all_valid():
+            return {"ok": True, "chat": True, "updated": False}
+        self.stop = True
+        shown = status or "missing"
+        if self.all_valid():
+            self.closing_line = (
+                f"Collection status is {shown}. Every mandatory field is valid. "
+                "The stored status was not changed, and no conversation was started."
+            )
+        else:
+            self.closing_line = (
+                f"Collection status is {shown}. Chat is closed, and the stored status was not changed."
+            )
+        self.audit.event(
+            "decision",
+            {"action": "skip_conversation", "reason": "status is not open for chat", "collection_status": shown},
+        )
+        self.audit.finish(None)
+        return {"ok": True, "chat": False, "updated": False}
 
     def progress(self) -> tuple[int, int]:
         return progress_count(self.assessments)
@@ -111,6 +157,7 @@ class Session:
                     "field": field,
                     "status": result.status,
                     "read_only": field == "phone",
+                    "reason": "" if field == "phone" else (result.reason or ""),
                 }
             )
         return {
@@ -121,7 +168,17 @@ class Session:
             "complete": self.all_valid(),
             "outcome": self.outcome,
             "stopped": self.stop,
+            "identity_confirmed": self.identity_confirmed,
+            "collection_status": self.api_status(),
+            "chat_enabled": not self.stop,
+            "start_enabled": self.api_status() != "completed",
+            "action_label": "Resume" if self.api_status() == "in_progress" and not self.stop else "Start",
+            "disabled_reason": "" if not self.stop else (self.closing_line or "Chat is closed."),
+            "outstanding": [item.field for item in outstanding(self.assessments)],
             "fields": fields,
+            "evidence": list(self.evidence),
+            "saved_fields": list(self.saved_fields),
+            "last_save": self.last_save,
         }
 
     def display_name(self) -> str | None:
@@ -265,19 +322,25 @@ class Session:
         return result
 
     def mark_already_complete(self) -> dict[str, Any]:
-        """Update status when the stored record is already valid. No chat is started."""
-        status = str(self.record.get("collection_status") or "")
+        """Complete a pending record whose mandatory fields are already valid.
+
+        The write uses the normal PATCH and a fresh GET. A record that is already
+        completed is left unchanged. Any other stored status is also left unchanged.
+        """
+        status = self.api_status()
         if status == "completed":
             self.outcome = "completed"
-            self.closing_line = (
-                "This application is already complete. All 11 mandatory fields are valid, "
-                "so no conversation is needed."
-            )
-            self.audit.event("decision", {"action": "skip_conversation", "reason": "already completed"})
+            self.stop = True
+            self.closing_line = ALREADY_COMPLETED_MESSAGE
+            self.audit.event("decision", {"action": "skip_conversation", "reason": "api status completed"})
             self.audit.finish("completed")
-            return {"ok": True, "updated": False, "outcome": "completed"}
+            return {"ok": True, "updated": False, "outcome": "completed", "chat": False}
+        if status != "pending" or not self.all_valid():
+            self.stop = True
+            shown = status or "missing"
+            self.closing_line = f"Collection status is {shown}. It was not changed."
+            return {"ok": False, "updated": False, "chat": False}
 
-        self.outcome = "completed"
         tracking = {
             "collection_status": "completed",
             "notes": self._notes(
@@ -288,18 +351,42 @@ class Session:
         }
         saved = self._save(tracking, include_attempt=False)
         fresh, mismatches = self._verify(saved.get("sent") or {})
-        self.closing_line = (
-            "This application is already complete. All 11 mandatory fields are valid, "
-            "so no conversation is needed."
+        verified = (
+            bool(saved.get("ok"))
+            and isinstance(fresh, dict)
+            and str(fresh.get("collection_status") or "") == "completed"
+            and not mismatches
         )
-        if saved.get("error"):
-            self.closing_line += " The status update could not be saved."
+        self.stop = True
+        if verified:
+            self.outcome = "completed"
+            self.closing_line = (
+                "All mandatory fields are valid and the stored status was pending. "
+                "The application is now completed. No conversation is needed."
+            )
+        else:
+            self.outcome = None
+            self.closing_line = "The completion update could not be verified. No conversation was started."
+            if saved.get("error"):
+                self.closing_line += " " + str(saved["error"])
         self.audit.event(
             "outcome",
-            {"outcome": "completed", "skipped_conversation": True, "verify_mismatches": mismatches},
+            {
+                "outcome": "completed" if verified else None,
+                "skipped_conversation": True,
+                "verify_mismatches": mismatches,
+                "verified": verified,
+            },
         )
-        self.audit.finish("completed")
-        return {"ok": saved.get("ok", False), "updated": True, "verify_mismatches": mismatches, "fresh": fresh is not None}
+        self.audit.finish("completed" if verified else None)
+        return {
+            "ok": verified,
+            "updated": bool(saved.get("ok")),
+            "outcome": "completed" if verified else None,
+            "verify_mismatches": mismatches,
+            "fresh": fresh is not None,
+            "chat": False,
+        }
 
     def _confirm_identity(self, confirmed: bool, note: str) -> dict[str, Any]:
         if confirmed:
@@ -315,6 +402,12 @@ class Session:
         return self.finish("needs_human", note or "Candidate said this is the wrong person.", [])
 
     def _record_fields(self, args: dict[str, Any]) -> dict[str, Any]:
+        if self.stop:
+            return {
+                "ok": False,
+                "error": "The conversation is already closed.",
+                "outcome": self.outcome,
+            }
         if not self.identity_confirmed:
             return {
                 "ok": False,
@@ -370,6 +463,15 @@ class Session:
                     "signal": item.signal,
                 },
             )
+            if item.field != "phone":
+                self.evidence.append(
+                    {
+                        "field": item.field,
+                        "quote": quote,
+                        "status": judged.status,
+                        "decision": decision,
+                    }
+                )
             entry: dict[str, Any] = {
                 "field": item.field,
                 "status": judged.status,
@@ -429,7 +531,13 @@ class Session:
             "all_mandatory_valid": self.all_valid(),
             "saved": save_result.get("ok") if save_result else False,
         }
-        if save_result and save_result.get("error"):
+        if save_result and save_result.get("ok"):
+            for name in accepted:
+                if name not in self.saved_fields:
+                    self.saved_fields.append(name)
+            self.last_save = "Saved " + ", ".join(accepted) + "."
+        elif save_result and save_result.get("error"):
+            self.last_save = "The save did not succeed."
             payload["save_error"] = save_result["error"]
         if self.all_valid():
             payload["instruction"] = (

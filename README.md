@@ -37,7 +37,7 @@ python main.py candidates
 
 1. `GET /v1/candidates/{id}` and `GET /v1/schema`.
 2. Python classifies each mandatory field as valid, missing, invalid, or needs clarification.
-3. If every mandatory field is valid, no chat starts.
+3. A record whose stored status is `completed` does not start a chat. A `pending` record whose mandatory fields are already valid is saved as `completed` and checked with a fresh GET. No other stored status is overwritten.
 4. Otherwise the terminal or site greets the candidate by name and confirms identity. The id is never requested.
 5. Gemini (`gemini-3.5-flash-lite`) decides the next step and calls tools. Python validates every extracted value before a save.
 6. Changed writable fields are sent with `PATCH`, `If-Match`, and a new idempotency key. A 409 rereads the record and retries. A fresh GET checks the write.
@@ -88,16 +88,19 @@ Verified on the live API:
 - `c005`: invalid email corrected and location saved. Status `completed`.
 - `c008`: invalid graduation year and missing CGPA corrected. Status `completed`.
 - `c007`: `/quit` before any answers saved `no_answer`.
+- `c001`: browser chat confirmed identity, then saved email and CGPA. Status `completed`.
 
 `gemini-3.5-flash-lite` returned a real `record_candidate_fields` tool call after `thinking_budget` was removed. The earlier `gemini-3.5-flash` free-tier daily quota is exhausted.
 
+Continue later, mandatory refusal, no answer, and `needs_human` are checked in `tests/test_exceptions.py` with a fake database. Those tests do not write to Prodigal. A closed session rejects later field saves.
+
 ## Known limits
 
-- `c001` (ambiguous CGPA, then refusal) and the continue-later closeout for `c002` did not finish. `c002` did save an available-from date as `in_progress` before the session was cut off.
+- `c002` reached `completed` after an in-progress session. The log is `runs/c002_20261114T153203_1f29de.json`.
 - The site keeps one session in memory. Restart the server to switch cleanly after a crash.
 - The model can still ask an awkward follow-up. Python, not the model, decides what is stored.
 - Free-tier Gemini limits can stop a chat mid-session. The error is printed and logged.
 
 ## Sample runs
 
-`runs/c004_20261114T145112_6282e1.json` and `runs/c005_20261114T145204_09281b.json` are completed live sessions. Phone numbers in the logs are redacted.
+`runs/c004_20261114T145112_6282e1.json` and `runs/c001_20261114T151722_b8307e.json` are live sessions with tool calls and API responses. Phone numbers in the logs are redacted. Keys are not written.

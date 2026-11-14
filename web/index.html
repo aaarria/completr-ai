@@ -3,190 +3,624 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Completr AI</title>
+  <title>Completr AI | Prodigal Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --navy: #0b1f33;
-      --ink: #14283c;
-      --teal: #0f7b6c;
-      --line: #d7e0e8;
-      --paper: #f4f7f8;
+      --orange: #ec792b;
+      --blue: #003d67;
+      --navy: #062333;
+      --ink: #062333;
+      --muted: #5c6d78;
+      --line: #e3e9ee;
+      --paper: #f4f6f8;
       --card: #ffffff;
+      --green: #0f7b6c;
+      --amber: #9a5b12;
+      --red: #8d2a2a;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-family: Inter, "Segoe UI", sans-serif;
       background: var(--paper);
       color: var(--ink);
     }
-    header {
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+    .sidebar {
+      background: var(--card);
+      border-right: 1px solid var(--line);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .logo { width: 168px; height: auto; display: block; }
+    .product { margin: 0; }
+    .product strong { display: block; color: var(--blue); font-size: 16px; }
+    .product span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+    nav { display: flex; flex-direction: column; gap: 4px; }
+    nav button {
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-left: 3px solid transparent;
+      color: var(--navy);
+      padding: 10px 12px;
+      border-radius: 0;
+    }
+    nav button.active { background: #fff6f0; border-left-color: var(--orange); color: var(--orange); font-weight: 600; }
+    nav button:hover { background: #f7f9fb; }
+    .content { min-width: 0; }
+    .top {
       background: var(--navy);
       color: white;
-      padding: 22px 28px;
-    }
-    header p { margin: 4px 0 0; color: #c5d4e0; }
-    main {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 18px;
-      padding: 18px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    section {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 16px;
-    }
-    h2 { margin: 0 0 12px; font-size: 16px; }
-    label { display: block; font-size: 13px; margin-bottom: 6px; }
-    input, button, textarea {
-      font: inherit;
-    }
-    input[type="text"] {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 8px 10px;
-    }
-    button {
-      background: var(--teal);
-      color: white;
-      border: 0;
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-    }
-    button.secondary { background: var(--navy); }
-    .row { display: flex; gap: 8px; margin-top: 10px; }
-    .bar {
-      height: 8px;
-      background: #e6eef2;
-      border-radius: 99px;
-      overflow: hidden;
-      margin: 8px 0 12px;
-    }
-    .bar span { display: block; height: 100%; background: var(--teal); }
-    ul { list-style: none; padding: 0; margin: 0; }
-    li {
+      padding: 14px 28px;
       display: flex;
       justify-content: space-between;
-      gap: 8px;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--line);
-      font-size: 13px;
+      gap: 16px;
+      align-items: center;
     }
-    .VALID { color: var(--teal); }
-    .MISSING, .INVALID, .NEEDS_CLARIFICATION { color: #9a4d16; }
+    .top p { margin: 2px 0 0; color: #c5d4de; font-size: 13px; }
+    .page { padding: 24px 28px 40px; }
+    h1 { margin: 0 0 6px; color: var(--blue); font-size: 28px; font-weight: 700; }
+    .lede { margin: 0 0 18px; color: var(--muted); max-width: 680px; }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      text-align: left;
+      box-shadow: 0 1px 2px rgba(6, 35, 51, 0.04);
+    }
+    .card:hover { border-color: #c9d5de; }
+    .card .count { display: block; font-size: 28px; font-weight: 700; color: var(--navy); margin-top: 8px; }
+    .card .label { color: var(--muted); font-size: 13px; }
+    .card.orange .count { color: var(--orange); }
+    .card.blue .count { color: var(--blue); }
+    .card.green .count { color: var(--green); }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    input[type="search"], select {
+      border: 1px solid var(--line);
+      background: white;
+      padding: 8px 10px;
+      min-width: 180px;
+    }
+    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: 0.02em; }
+    tr:hover td { background: #fafbfc; }
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #eef2f5;
+      color: var(--navy);
+    }
+    .status.pending { background: #fff1e8; color: #9a4d16; }
+    .status.in_progress { background: #e8f1f8; color: var(--blue); }
+    .status.completed { background: #e7f4f2; color: var(--green); }
+    .status.no_answer { background: #eef2f5; color: var(--muted); }
+    .status.refused { background: #f8e8e8; color: var(--red); }
+    .status.needs_human { background: #f8efe2; color: var(--amber); }
+    .bar { height: 6px; background: #e6eef2; width: 92px; }
+    .bar span { display: block; height: 100%; background: var(--orange); }
+    .action {
+      background: var(--orange);
+      color: white;
+      border: 0;
+      padding: 7px 12px;
+    }
+    .action.secondary { background: var(--blue); }
+    .action:disabled { opacity: 0.55; cursor: default; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .panel { background: white; border: 1px solid var(--line); padding: 16px; }
+    .panel h2 { margin: 0 0 12px; font-size: 16px; color: var(--blue); }
     #log {
-      height: 420px;
+      min-height: 360px;
+      max-height: 520px;
       overflow: auto;
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-    .bubble {
-      max-width: 80%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      white-space: pre-wrap;
+    .bubble { max-width: 82%; padding: 10px 12px; white-space: pre-wrap; }
+    .agent { background: #fff6f0; align-self: flex-start; }
+    .candidate { background: #e8f1f8; align-self: flex-end; }
+    .typing { color: var(--muted); font-style: italic; }
+    .stamp { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .composer { display: flex; gap: 8px; margin-top: 12px; }
+    textarea { flex: 1; border: 1px solid var(--line); padding: 8px; resize: vertical; }
+    .reason { color: var(--muted); font-size: 13px; min-height: 1.2em; }
+    .error { color: var(--red); min-height: 1.2em; }
+    .profile p { margin: 4px 0; color: var(--muted); font-size: 14px; }
+    .banner { padding: 8px 10px; margin: 8px 0; font-size: 13px; background: #fff6f0; }
+    .banner.summary { background: #e8f1f8; }
+    ul.fields, ul.evidence { list-style: none; padding: 0; margin: 0; }
+    ul.fields li, ul.evidence li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
     }
-    .agent { background: #e7f4f2; }
-    .candidate { background: #e8eef6; align-self: flex-end; }
-    form { display: flex; gap: 8px; margin-top: 12px; }
-    textarea { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px; resize: vertical; }
-    #error { color: #8d2a2a; min-height: 1.2em; }
-    @media (max-width: 800px) {
-      main { grid-template-columns: 1fr; }
+    .VALID { color: var(--green); font-weight: 600; }
+    .MISSING, .INVALID, .NEEDS_CLARIFICATION { color: var(--amber); font-weight: 600; }
+    .empty, .loading { color: var(--muted); padding: 24px; background: white; border: 1px solid var(--line); }
+    .back { background: transparent; border: 1px solid var(--line); padding: 7px 12px; margin-bottom: 12px; }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      nav { flex-direction: row; flex-wrap: wrap; }
+      .workspace { grid-template-columns: 1fr; }
+      .page { padding: 16px; }
+      table { display: block; overflow-x: auto; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <strong>COMPLETR AI</strong>
-    <p>Intelligent Application Completion</p>
-  </header>
-  <main>
-    <section>
-      <h2>Candidate</h2>
-      <label for="candidate">Candidate id</label>
-      <input id="candidate" type="text" placeholder="From python main.py candidates" />
-      <div class="row">
-        <button id="start" type="button">Start</button>
+  <div class="app">
+    <aside class="sidebar">
+      <img class="logo" src="/prodigal-logo.svg" alt="Prodigal Technologies" />
+      <p class="product">
+        <strong>Completr AI</strong>
+        <span>Intelligent Application Completion</span>
+      </p>
+      <nav>
+        <button type="button" data-view="dashboard" class="active">Dashboard</button>
+        <button type="button" data-view="candidates">Candidates</button>
+        <button type="button" data-view="activity">Activity</button>
+      </nav>
+    </aside>
+    <div class="content">
+      <header class="top">
+        <div>
+          <strong>Completr AI</strong>
+          <p>An AI-powered application completion platform built for Prodigal Technologies.</p>
+        </div>
+      </header>
+      <div class="page">
+        <section id="dashboard">
+          <h1>Dashboard</h1>
+          <p class="lede">Application completion for the Prodigal candidate workspace. Counts come from the live Candidate Database.</p>
+          <div id="dash-body" class="loading">Loading candidates…</div>
+        </section>
+        <section id="candidates" hidden>
+          <h1>Candidates</h1>
+          <p class="lede">Search and filter the live workspace. Phone numbers are not shown.</p>
+          <div class="toolbar">
+            <input id="search" type="search" placeholder="Search name, id, or college" />
+            <select id="filter">
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In progress</option>
+              <option value="completed">Completed</option>
+              <option value="no_answer">No answer</option>
+              <option value="refused">Refused</option>
+              <option value="needs_human">Needs human</option>
+            </select>
+          </div>
+          <div id="table-body" class="loading">Loading candidates…</div>
+        </section>
+        <section id="activity" hidden>
+          <h1>Activity</h1>
+          <p class="lede">Local audit files. Messages and phone numbers stay in the files and are not listed here.</p>
+          <div id="activity-body" class="loading">Loading activity…</div>
+        </section>
+        <section id="workspace" hidden>
+          <button class="back" id="back" type="button">Back to candidates</button>
+          <div class="workspace">
+            <div class="panel">
+              <h2>Conversation</h2>
+              <div id="log"></div>
+              <p id="error" class="error"></p>
+              <p id="chat-reason" class="reason"></p>
+              <form class="composer" id="chat">
+                <textarea id="text" rows="2" placeholder="Reply as the candidate. Enter sends. /quit ends the session." disabled></textarea>
+                <button class="action" id="send" type="submit" disabled>Send</button>
+              </form>
+            </div>
+            <div class="panel">
+              <h2>Application</h2>
+              <div class="profile" id="profile"><p>No candidate selected.</p></div>
+              <p id="progress"></p>
+              <div class="bar"><span id="fill"></span></div>
+              <p id="outcome"></p>
+              <div id="save"></div>
+              <div id="summary"></div>
+              <h2>Mandatory fields</h2>
+              <ul class="fields" id="fields"></ul>
+              <h2>Evidence</h2>
+              <ul class="evidence" id="evidence"></ul>
+            </div>
+          </div>
+        </section>
       </div>
-      <p id="progress">Progress: not started</p>
-      <div class="bar"><span id="fill" style="width:0%"></span></div>
-      <p id="outcome"></p>
-      <ul id="fields"></ul>
-    </section>
-    <section>
-      <h2>Conversation</h2>
-      <div id="log"></div>
-      <p id="error"></p>
-      <form id="chat">
-        <textarea id="text" rows="2" placeholder="Reply as the candidate. /quit ends the session."></textarea>
-        <button class="secondary" type="submit">Send</button>
-      </form>
-    </section>
-  </main>
+    </div>
+  </div>
   <script>
-    const log = document.querySelector("#log");
-    const error = document.querySelector("#error");
+    const STATUS_LABEL = {
+      pending: "Pending",
+      in_progress: "In progress",
+      completed: "Completed",
+      no_answer: "No answer",
+      refused: "Refused",
+      needs_human: "Needs human",
+    };
+    const CARDS = [
+      ["total", "Total candidates", ""],
+      ["pending", "Pending", "orange"],
+      ["in_progress", "In progress", "blue"],
+      ["completed", "Completed", "green"],
+      ["no_answer", "No answer", ""],
+      ["refused", "Refused", ""],
+      ["needs_human", "Needs human", ""],
+    ];
+    let catalog = null;
+    let sending = false;
+    let chatEnabled = false;
 
-    function paint(data) {
-      error.textContent = data.ok ? "" : (data.error || "Request failed.");
-      if (!data.ok) return;
-      log.innerHTML = "";
-      for (const message of data.messages || []) {
-        const div = document.createElement("div");
-        div.className = "bubble " + message.role;
-        div.textContent = message.text;
-        log.appendChild(div);
-      }
-      log.scrollTop = log.scrollHeight;
-      const state = data.state || {};
-      const done = state.done || 0;
-      const total = state.total || 11;
-      document.querySelector("#progress").textContent = "Progress: " + done + "/" + total + " mandatory fields valid";
-      document.querySelector("#fill").style.width = (total ? (done / total) * 100 : 0) + "%";
-      document.querySelector("#outcome").textContent = state.outcome
-        ? "Outcome: " + state.outcome
-        : (state.complete ? "All mandatory fields are valid." : "Outstanding fields are listed below.");
-      const list = document.querySelector("#fields");
-      list.innerHTML = "";
-      for (const field of state.fields || []) {
-        const item = document.createElement("li");
-        const name = document.createElement("span");
-        name.textContent = field.read_only ? field.field + " (read-only)" : field.field;
-        const status = document.createElement("span");
-        status.className = field.status;
-        status.textContent = field.status;
-        item.append(name, status);
-        list.appendChild(item);
-      }
+    function label(status) {
+      return STATUS_LABEL[status] || status || "Unknown";
     }
-
-    async function post(path, body) {
+    function actionFor(status) {
+      if (status === "pending") return "Start";
+      if (status === "in_progress") return "Resume";
+      if (status === "completed") return "View";
+      return "View";
+    }
+    function show(name) {
+      for (const id of ["dashboard", "candidates", "activity", "workspace"]) {
+        document.getElementById(id).hidden = id !== name;
+      }
+      document.querySelectorAll("nav button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === name);
+      });
+    }
+    async function getJson(path) {
+      const response = await fetch(path);
+      const data = await response.json();
+      if (!response.ok && data && !data.error) data.error = "Request failed.";
+      return data;
+    }
+    async function postJson(path, body) {
       const response = await fetch(path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      return response.json();
+      const data = await response.json();
+      if (!response.ok && data && !data.error) data.error = "Request failed.";
+      return data;
     }
-
-    document.querySelector("#start").addEventListener("click", async () => {
-      paint(await post("/api/start", { candidate_id: document.querySelector("#candidate").value }));
+    function statusNode(status) {
+      const span = document.createElement("span");
+      span.className = "status " + (status || "");
+      span.textContent = label(status);
+      return span;
+    }
+    function renderDashboard() {
+      const host = document.getElementById("dash-body");
+      host.className = "";
+      host.innerHTML = "";
+      if (!catalog || !catalog.ok) {
+        host.className = "empty";
+        host.textContent = (catalog && catalog.error) || "The candidate list could not be loaded.";
+        return;
+      }
+      const wrap = document.createElement("div");
+      wrap.className = "cards";
+      const counts = catalog.counts || {};
+      for (const [key, text, tone] of CARDS) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "card " + tone;
+        const name = document.createElement("span");
+        name.className = "label";
+        name.textContent = text;
+        const count = document.createElement("span");
+        count.className = "count";
+        count.textContent = String(key === "total" ? catalog.total : (counts[key] || 0));
+        button.append(name, count);
+        button.addEventListener("click", () => {
+          document.getElementById("filter").value = key === "total" ? "" : key;
+          show("candidates");
+          renderTable();
+        });
+        wrap.appendChild(button);
+      }
+      host.appendChild(wrap);
+    }
+    function renderTable() {
+      const host = document.getElementById("table-body");
+      host.className = "";
+      host.innerHTML = "";
+      if (!catalog || !catalog.ok) {
+        host.className = "empty";
+        host.textContent = (catalog && catalog.error) || "The candidate list could not be loaded.";
+        return;
+      }
+      const query = document.getElementById("search").value.trim().toLowerCase();
+      const filter = document.getElementById("filter").value;
+      const rows = (catalog.candidates || []).filter((row) => {
+        const haystack = (row.name + " " + row.id + " " + row.college).toLowerCase();
+        if (query && !haystack.includes(query)) return false;
+        if (filter && row.collection_status !== filter) return false;
+        return true;
+      });
+      if (!rows.length) {
+        host.className = "empty";
+        host.textContent = "No candidates match this search.";
+        return;
+      }
+      const table = document.createElement("table");
+      const head = document.createElement("tr");
+      for (const title of ["Candidate", "ID", "College", "Status", "Mandatory", "Progress", "Last contacted", "Action"]) {
+        const cell = document.createElement("th");
+        cell.textContent = title;
+        head.appendChild(cell);
+      }
+      table.appendChild(head);
+      for (const row of rows) {
+        const tr = document.createElement("tr");
+        const name = document.createElement("td");
+        name.textContent = row.name || "Name not on record";
+        const id = document.createElement("td");
+        id.textContent = row.id;
+        const college = document.createElement("td");
+        college.textContent = row.college || "—";
+        const status = document.createElement("td");
+        status.appendChild(statusNode(row.collection_status));
+        const mandatory = document.createElement("td");
+        mandatory.textContent = row.done + "/" + row.total;
+        const progress = document.createElement("td");
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        const fill = document.createElement("span");
+        fill.style.width = (row.total ? (row.done / row.total) * 100 : 0) + "%";
+        bar.appendChild(fill);
+        progress.appendChild(bar);
+        const contacted = document.createElement("td");
+        contacted.textContent = row.last_contacted_at || "—";
+        const action = document.createElement("td");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = row.collection_status === "completed" ? "action secondary" : "action";
+        button.textContent = actionFor(row.collection_status);
+        button.addEventListener("click", () => openCandidate(row.id));
+        action.appendChild(button);
+        tr.append(name, id, college, status, mandatory, progress, contacted, action);
+        table.appendChild(tr);
+      }
+      host.appendChild(table);
+    }
+    function renderActivity(data) {
+      const host = document.getElementById("activity-body");
+      host.className = "";
+      host.innerHTML = "";
+      const runs = (data && data.runs) || [];
+      if (!data || !data.ok) {
+        host.className = "empty";
+        host.textContent = (data && data.error) || "Activity could not be loaded.";
+        return;
+      }
+      if (!runs.length) {
+        host.className = "empty";
+        host.textContent = "No audit files yet.";
+        return;
+      }
+      const table = document.createElement("table");
+      const head = document.createElement("tr");
+      for (const title of ["Candidate", "Started", "Finished", "Outcome", "Events"]) {
+        const cell = document.createElement("th");
+        cell.textContent = title;
+        head.appendChild(cell);
+      }
+      table.appendChild(head);
+      for (const run of runs) {
+        const tr = document.createElement("tr");
+        for (const value of [run.candidate_id, run.started_at, run.finished_at || "—", run.final_outcome || "—", String(run.events)]) {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          tr.appendChild(cell);
+        }
+        table.appendChild(tr);
+      }
+      host.appendChild(table);
+    }
+    async function loadCatalog() {
+      try {
+        catalog = await getJson("/api/candidates");
+      } catch (err) {
+        catalog = { ok: false, error: "Could not reach the local site." };
+      }
+      renderDashboard();
+      renderTable();
+    }
+    function addBubble(role, text, at) {
+      const log = document.getElementById("log");
+      const div = document.createElement("div");
+      div.className = "bubble " + role;
+      div.textContent = text;
+      const time = document.createElement("span");
+      time.className = "stamp";
+      time.textContent = at || "";
+      div.appendChild(time);
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      return div;
+    }
+    function setComposer() {
+      document.getElementById("text").disabled = !chatEnabled;
+      document.getElementById("send").disabled = !chatEnabled;
+      const reason = document.getElementById("chat-reason");
+      reason.textContent = chatEnabled ? "" : (reason.dataset.reason || "Chat is closed.");
+    }
+    function paint(data) {
+      const state = data.state || {};
+      const done = state.done || 0;
+      const total = state.total || 11;
+      document.getElementById("profile").replaceChildren();
+      const profile = document.getElementById("profile");
+      const title = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = state.name || "Name not confirmed";
+      title.append(strong, document.createTextNode(" · " + (state.candidate_id || "")));
+      const identity = document.createElement("p");
+      identity.textContent = "Identity: " + (state.identity_confirmed ? "confirmed" : "waiting for confirmation");
+      const status = document.createElement("p");
+      status.textContent = "Collection status: " + (state.collection_status || "unknown");
+      profile.append(title, identity, status);
+      document.getElementById("progress").textContent = "Progress: " + done + "/" + total + " mandatory fields valid";
+      document.getElementById("fill").style.width = (total ? (done / total) * 100 : 0) + "%";
+      document.getElementById("outcome").textContent = state.outcome ? "Outcome: " + state.outcome : "";
+      const save = document.getElementById("save");
+      save.replaceChildren();
+      if (state.last_save) {
+        const banner = document.createElement("div");
+        banner.className = "banner";
+        banner.textContent = state.last_save;
+        save.appendChild(banner);
+      }
+      const summary = document.getElementById("summary");
+      summary.replaceChildren();
+      if (state.stopped || state.outcome) {
+        const banner = document.createElement("div");
+        banner.className = "banner summary";
+        banner.textContent = "Updated: " + ((state.saved_fields || []).join(", ") || "none in this session")
+          + ". Unresolved: " + ((state.outstanding || []).join(", ") || "none")
+          + ". Collection status: " + (state.collection_status || "unknown")
+          + (state.outcome ? ". Outcome: " + state.outcome : "");
+        summary.appendChild(banner);
+      }
+      const fields = document.getElementById("fields");
+      fields.replaceChildren();
+      for (const field of state.fields || []) {
+        const item = document.createElement("li");
+        const name = document.createElement("span");
+        name.textContent = field.read_only ? field.field + " (read-only)" : field.field;
+        const mark = document.createElement("span");
+        mark.className = field.status;
+        mark.textContent = field.status;
+        item.append(name, mark);
+        fields.appendChild(item);
+      }
+      const evidence = document.getElementById("evidence");
+      evidence.replaceChildren();
+      const items = state.evidence || [];
+      if (!items.length) {
+        const empty = document.createElement("li");
+        empty.textContent = "Quotes appear after a field is extracted.";
+        evidence.appendChild(empty);
+      }
+      for (const item of items) {
+        const row = document.createElement("li");
+        const copy = document.createElement("span");
+        copy.textContent = item.field + ": " + (item.quote || "No exact quote was found.");
+        const mark = document.createElement("span");
+        mark.className = item.status || "";
+        mark.textContent = item.status || item.decision || "";
+        row.append(copy, mark);
+        evidence.appendChild(row);
+      }
+      const log = document.getElementById("log");
+      log.replaceChildren();
+      for (const message of data.messages || []) addBubble(message.role, message.text, message.at);
+      chatEnabled = Boolean(state.chat_enabled);
+      document.getElementById("chat-reason").dataset.reason = state.disabled_reason || "Chat is closed.";
+      setComposer();
+    }
+    async function openCandidate(id) {
+      show("workspace");
+      document.getElementById("error").textContent = "";
+      document.getElementById("log").replaceChildren();
+      addBubble("agent", "Loading " + id + "…", "");
+      chatEnabled = false;
+      setComposer();
+      try {
+        const data = await postJson("/api/start", { candidate_id: id });
+        if (!data.ok) {
+          document.getElementById("log").replaceChildren();
+          document.getElementById("error").textContent = data.error || "Could not open this candidate.";
+          document.getElementById("chat-reason").dataset.reason = data.error || "Chat is closed.";
+          chatEnabled = false;
+          setComposer();
+          return;
+        }
+        paint(data);
+      } catch (err) {
+        document.getElementById("error").textContent = "Could not open this candidate.";
+      }
+    }
+    document.querySelectorAll("nav button").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const view = button.dataset.view;
+        show(view);
+        if (view === "activity") {
+          try {
+            renderActivity(await getJson("/api/activity"));
+          } catch (err) {
+            renderActivity({ ok: false, error: "Could not load activity." });
+          }
+        }
+      });
     });
-    document.querySelector("#chat").addEventListener("submit", async (event) => {
+    document.getElementById("search").addEventListener("input", renderTable);
+    document.getElementById("filter").addEventListener("change", renderTable);
+    document.getElementById("back").addEventListener("click", () => show("candidates"));
+    document.getElementById("chat").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const box = document.querySelector("#text");
-      const text = box.value;
+      if (sending || !chatEnabled) return;
+      const box = document.getElementById("text");
+      const text = box.value.trim();
+      if (!text) {
+        document.getElementById("error").textContent = "Type a reply first.";
+        return;
+      }
+      sending = true;
+      document.getElementById("error").textContent = "";
       box.value = "";
-      paint(await post("/api/message", { text }));
+      addBubble("candidate", text, "");
+      const typing = addBubble("agent typing", "Completr is typing…", "");
+      try {
+        const data = await postJson("/api/message", { text });
+        typing.remove();
+        if (!data.ok) {
+          document.getElementById("error").textContent = data.error || "The reply could not be sent.";
+          return;
+        }
+        paint(data);
+        if (data.notice) document.getElementById("error").textContent = data.notice;
+      } catch (err) {
+        typing.remove();
+        document.getElementById("error").textContent = "The reply could not be sent. Your message is still in the conversation.";
+      } finally {
+        sending = false;
+        setComposer();
+      }
     });
+    document.getElementById("text").addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        document.getElementById("chat").requestSubmit();
+      }
+    });
+    loadCatalog();
   </script>
 </body>
 </html>
