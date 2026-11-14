@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Completr AI</title>
+  <style>
+    :root {
+      --navy: #0b1f33;
+      --ink: #14283c;
+      --teal: #0f7b6c;
+      --line: #d7e0e8;
+      --paper: #f4f7f8;
+      --card: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 22px 28px;
+    }
+    header p { margin: 4px 0 0; color: #c5d4e0; }
+    main {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 18px;
+      padding: 18px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    h2 { margin: 0 0 12px; font-size: 16px; }
+    label { display: block; font-size: 13px; margin-bottom: 6px; }
+    input, button, textarea {
+      font: inherit;
+    }
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    button {
+      background: var(--teal);
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    button.secondary { background: var(--navy); }
+    .row { display: flex; gap: 8px; margin-top: 10px; }
+    .bar {
+      height: 8px;
+      background: #e6eef2;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 8px 0 12px;
+    }
+    .bar span { display: block; height: 100%; background: var(--teal); }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .VALID { color: var(--teal); }
+    .MISSING, .INVALID, .NEEDS_CLARIFICATION { color: #9a4d16; }
+    #log {
+      height: 420px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bubble {
+      max-width: 80%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+    }
+    .agent { background: #e7f4f2; }
+    .candidate { background: #e8eef6; align-self: flex-end; }
+    form { display: flex; gap: 8px; margin-top: 12px; }
+    textarea { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px; resize: vertical; }
+    #error { color: #8d2a2a; min-height: 1.2em; }
+    @media (max-width: 800px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>COMPLETR AI</strong>
+    <p>Intelligent Application Completion</p>
+  </header>
+  <main>
+    <section>
+      <h2>Candidate</h2>
+      <label for="candidate">Candidate id</label>
+      <input id="candidate" type="text" placeholder="From python main.py candidates" />
+      <div class="row">
+        <button id="start" type="button">Start</button>
+      </div>
+      <p id="progress">Progress: not started</p>
+      <div class="bar"><span id="fill" style="width:0%"></span></div>
+      <p id="outcome"></p>
+      <ul id="fields"></ul>
+    </section>
+    <section>
+      <h2>Conversation</h2>
+      <div id="log"></div>
+      <p id="error"></p>
+      <form id="chat">
+        <textarea id="text" rows="2" placeholder="Reply as the candidate. /quit ends the session."></textarea>
+        <button class="secondary" type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+  <script>
+    const log = document.querySelector("#log");
+    const error = document.querySelector("#error");
+
+    function paint(data) {
+      error.textContent = data.ok ? "" : (data.error || "Request failed.");
+      if (!data.ok) return;
+      log.innerHTML = "";
+      for (const message of data.messages || []) {
+        const div = document.createElement("div");
+        div.className = "bubble " + message.role;
+        div.textContent = message.text;
+        log.appendChild(div);
+      }
+      log.scrollTop = log.scrollHeight;
+      const state = data.state || {};
+      const done = state.done || 0;
+      const total = state.total || 11;
+      document.querySelector("#progress").textContent = "Progress: " + done + "/" + total + " mandatory fields valid";
+      document.querySelector("#fill").style.width = (total ? (done / total) * 100 : 0) + "%";
+      document.querySelector("#outcome").textContent = state.outcome
+        ? "Outcome: " + state.outcome
+        : (state.complete ? "All mandatory fields are valid." : "Outstanding fields are listed below.");
+      const list = document.querySelector("#fields");
+      list.innerHTML = "";
+      for (const field of state.fields || []) {
+        const item = document.createElement("li");
+        const name = document.createElement("span");
+        name.textContent = field.read_only ? field.field + " (read-only)" : field.field;
+        const status = document.createElement("span");
+        status.className = field.status;
+        status.textContent = field.status;
+        item.append(name, status);
+        list.appendChild(item);
+      }
+    }
+
+    async function post(path, body) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return response.json();
+    }
+
+    document.querySelector("#start").addEventListener("click", async () => {
+      paint(await post("/api/start", { candidate_id: document.querySelector("#candidate").value }));
+    });
+    document.querySelector("#chat").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const box = document.querySelector("#text");
+      const text = box.value;
+      box.value = "";
+      paint(await post("/api/message", { text }));
+    });
+  </script>
+</body>
+</html>

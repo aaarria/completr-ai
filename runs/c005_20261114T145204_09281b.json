@@ -1,0 +1,569 @@
+{
+  "product": "Completr AI",
+  "candidate_id": "c005",
+  "started_at": "2026-11-14T14:52:04+05:30",
+  "events": [
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "type": "api_response",
+      "payload": {
+        "method": "GET",
+        "path": "/v1/candidates/c005",
+        "body": {
+          "id": "c005",
+          "full_name": "Kabir Shah",
+          "email": "kabir.shah@gmail",
+          "college": "DJ Sanghvi, Mumbai",
+          "degree": "B.E.",
+          "branch": "Electronics and Telecommunication",
+          "graduation_year": 2027,
+          "cgpa": 7.4,
+          "preferred_location": null,
+          "available_from": "2027-01-04",
+          "internship_duration_months": 6,
+          "linkedin_url": null,
+          "github_url": null,
+          "skills": null,
+          "phone": "[redacted]",
+          "collection_status": "pending",
+          "attempt_count": 0,
+          "last_contacted_at": null,
+          "notes": null,
+          "version": 1,
+          "updated_at": "2026-11-14T08:30:14+00:00"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "type": "api_response",
+      "payload": {
+        "method": "GET",
+        "path": "/v1/schema",
+        "body": {
+          "mandatory_fields": [
+            "full_name",
+            "phone",
+            "email",
+            "college",
+            "degree",
+            "branch",
+            "graduation_year",
+            "cgpa",
+            "preferred_location",
+            "available_from",
+            "internship_duration_months"
+          ],
+          "collection_statuses": [
+            "pending",
+            "in_progress",
+            "completed",
+            "no_answer",
+            "refused",
+            "needs_human"
+          ],
+          "validation": "The API does not validate field values. It stores whatever you send. Enforcing these rules is your agent's job.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "mandatory": true,
+              "writable": false,
+              "rules": "Assigned by the server, e.g. c001."
+            },
+            {
+              "name": "full_name",
+              "type": "string",
+              "mandatory": true,
+              "writable": true,
+              "rules": "2-100 chars. Always present in seed data."
+            },
+            {
+              "name": "phone",
+              "type": "string (E.164)",
+              "mandatory": true,
+              "writable": false,
+              "rules": "OTP-verified at form submission. Read-only."
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "mandatory": true,
+              "writable": true,
+              "rules": "Valid email address, max 254 chars."
+            },
+            {
+              "name": "college",
+              "type": "string",
+              "mandatory": true,
+              "writable": true,
+              "rules": "2-150 chars."
+            },
+            {
+              "name": "degree",
+              "type": "enum",
+              "mandatory": true,
+              "writable": true,
+              "rules": "One of: B.Tech, B.E., B.Sc, BCA, MBA Tech, MCA, M.Tech, Other"
+            },
+            {
+              "name": "branch",
+              "type": "string",
+              "mandatory": true,
+              "writable": true,
+              "rules": "Specialisation / stream, 2-100 chars, e.g. 'Computer Engineering'."
+            },
+            {
+              "name": "graduation_year",
+              "type": "integer",
+              "mandatory": true,
+              "writable": true,
+              "rules": "2026-2028 inclusive."
+            },
+            {
+              "name": "cgpa",
+              "type": "number",
+              "mandatory": true,
+              "writable": true,
+              "rules": "0.0-10.0 on a 10-point scale, stored to 2 decimals."
+            },
+            {
+              "name": "preferred_location",
+              "type": "enum",
+              "mandatory": true,
+              "writable": true,
+              "rules": "One of: Mumbai, Bengaluru, Remote, No preference"
+            },
+            {
+              "name": "available_from",
+              "type": "date (YYYY-MM-DD)",
+              "mandatory": true,
+              "writable": true,
+              "rules": "2026-01-01 to 2027-12-31."
+            },
+            {
+              "name": "internship_duration_months",
+              "type": "enum (integer)",
+              "mandatory": true,
+              "writable": true,
+              "rules": "One of: 2, 3, 6"
+            },
+            {
+              "name": "linkedin_url",
+              "type": "string (URL)",
+              "mandatory": false,
+              "writable": true,
+              "rules": "A linkedin.com URL."
+            },
+            {
+              "name": "github_url",
+              "type": "string (URL)",
+              "mandatory": false,
+              "writable": true,
+              "rules": "A github.com profile URL."
+            },
+            {
+              "name": "skills",
+              "type": "array of strings",
+              "mandatory": false,
+              "writable": true,
+              "rules": "Up to 30 items, each 1-50 chars."
+            },
+            {
+              "name": "collection_status",
+              "type": "enum",
+              "mandatory": false,
+              "writable": true,
+              "rules": "One of: pending, in_progress, completed, no_answer, refused, needs_human. Defaults to 'pending'."
+            },
+            {
+              "name": "attempt_count",
+              "type": "integer",
+              "mandatory": false,
+              "writable": true,
+              "rules": "0-50. Defaults to 0."
+            },
+            {
+              "name": "last_contacted_at",
+              "type": "datetime (ISO 8601)",
+              "mandatory": false,
+              "writable": true,
+              "rules": "Include a timezone offset."
+            },
+            {
+              "name": "notes",
+              "type": "string",
+              "mandatory": false,
+              "writable": true,
+              "rules": "Free text, max 4000 chars."
+            },
+            {
+              "name": "version",
+              "type": "integer",
+              "mandatory": false,
+              "writable": false,
+              "rules": "Increments on every change. Send it as If-Match to avoid lost updates."
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime",
+              "mandatory": false,
+              "writable": false,
+              "rules": "Server timestamp of the last change."
+            }
+          ],
+          "concurrency": "Send the record's `version` as an If-Match header on PATCH; a stale version returns 409.",
+          "idempotency": "Send an Idempotency-Key header on PATCH; a retry with the same key and body replays the original response without applying it twice."
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "type": "decision",
+      "payload": {
+        "schema_mandatory_fields": [
+          "full_name",
+          "phone",
+          "email",
+          "college",
+          "degree",
+          "branch",
+          "graduation_year",
+          "cgpa",
+          "preferred_location",
+          "available_from",
+          "internship_duration_months"
+        ],
+        "schema_statuses": [
+          "pending",
+          "in_progress",
+          "completed",
+          "no_answer",
+          "refused",
+          "needs_human"
+        ]
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "type": "decision",
+      "payload": {
+        "model": "gemini-3.5-flash"
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "type": "decision",
+      "payload": {
+        "identity_confirmed": true,
+        "source": "explicit reply"
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:09+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "get_application_state",
+        "args": {}
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:09+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "get_application_state",
+        "args": {},
+        "result": {
+          "state": "Identity confirmed: yes\nProgress: 9/11 mandatory fields valid\nFields:\n- full_name: VALID | stored: Kabir Shah\n- phone: VALID | read-only | do not ask for it and do not update it\n- email: INVALID | Email must be a valid address, up to 254 characters.\n- college: VALID | stored: DJ Sanghvi, Mumbai\n- degree: VALID | stored: B.E.\n- branch: VALID | stored: Electronics and Telecommunication\n- graduation_year: VALID | stored: 2027\n- cgpa: VALID | stored: 7.4\n- preferred_location: MISSING\n- available_from: VALID | stored: 2027-01-04\n- internship_duration_months: VALID | stored: 6\n- linkedin_url: MISSING | optional\n- github_url: MISSING | optional\n- skills: MISSING | optional\nStill required: email, preferred_location"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:38+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "value": "candidate.c005@example.com",
+              "signal": "clear",
+              "field": "email"
+            },
+            {
+              "signal": "clear",
+              "field": "preferred_location",
+              "value": "Mumbai"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:38+05:30",
+      "type": "validation",
+      "payload": {
+        "field": "email",
+        "signal": "clear",
+        "status": "VALID",
+        "normalized": "candidate.c005@example.com",
+        "reason": ""
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:38+05:30",
+      "type": "validation",
+      "payload": {
+        "field": "preferred_location",
+        "signal": "clear",
+        "status": "VALID",
+        "normalized": "Mumbai",
+        "reason": ""
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:38+05:30",
+      "type": "database_update",
+      "payload": {
+        "method": "PATCH",
+        "path": "/v1/candidates/c005",
+        "if_match": 1,
+        "idempotency_key": "45148b10-2e33-4a0f-ae04-45ee5efa6366",
+        "body": {
+          "collection_status": "in_progress",
+          "notes": "Completr AI outcome: in_progress. All mandatory fields are valid. Saved valid answers during the conversation.",
+          "last_contacted_at": "2026-11-14T14:52:38+05:30",
+          "email": "candidate.c005@example.com",
+          "preferred_location": "Mumbai",
+          "attempt_count": 1
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:39+05:30",
+      "type": "api_response",
+      "payload": {
+        "ok": true,
+        "method": "PATCH",
+        "body": {
+          "id": "c005",
+          "full_name": "Kabir Shah",
+          "email": "candidate.c005@example.com",
+          "college": "DJ Sanghvi, Mumbai",
+          "degree": "B.E.",
+          "branch": "Electronics and Telecommunication",
+          "graduation_year": 2027,
+          "cgpa": 7.4,
+          "preferred_location": "Mumbai",
+          "available_from": "2027-01-04",
+          "internship_duration_months": 6,
+          "linkedin_url": null,
+          "github_url": null,
+          "skills": null,
+          "phone": "[redacted]",
+          "collection_status": "in_progress",
+          "attempt_count": 1,
+          "last_contacted_at": "2026-11-14T14:52:38+05:30",
+          "notes": "Completr AI outcome: in_progress. All mandatory fields are valid. Saved valid answers during the conversation.",
+          "version": 2,
+          "updated_at": "2026-11-14T09:22:38+00:00"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:39+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "value": "candidate.c005@example.com",
+              "signal": "clear",
+              "field": "email"
+            },
+            {
+              "signal": "clear",
+              "field": "preferred_location",
+              "value": "Mumbai"
+            }
+          ]
+        },
+        "result": {
+          "ok": true,
+          "results": [
+            {
+              "field": "email",
+              "status": "VALID",
+              "reason": "",
+              "stored": true,
+              "normalized": "candidate.c005@example.com"
+            },
+            {
+              "field": "preferred_location",
+              "status": "VALID",
+              "reason": "",
+              "stored": true,
+              "normalized": "Mumbai"
+            }
+          ],
+          "progress": "11/11",
+          "all_mandatory_valid": true,
+          "saved": true,
+          "instruction": "Every mandatory field is valid. Thank the candidate and call end_conversation with outcome completed. Do not ask more mandatory questions."
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "end_conversation",
+        "args": {
+          "outcome": "completed",
+          "note": "All mandatory fields have been successfully collected and verified."
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "database_update",
+      "payload": {
+        "method": "PATCH",
+        "path": "/v1/candidates/c005",
+        "if_match": 2,
+        "idempotency_key": "0a59f564-ae2c-4a4d-8c20-fc05e9bd7659",
+        "body": {
+          "collection_status": "completed",
+          "notes": "Completr AI outcome: completed. All mandatory fields are valid. All mandatory fields have been successfully collected and verified.",
+          "last_contacted_at": "2026-11-14T14:52:40+05:30"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "api_response",
+      "payload": {
+        "ok": true,
+        "method": "PATCH",
+        "body": {
+          "id": "c005",
+          "full_name": "Kabir Shah",
+          "email": "candidate.c005@example.com",
+          "college": "DJ Sanghvi, Mumbai",
+          "degree": "B.E.",
+          "branch": "Electronics and Telecommunication",
+          "graduation_year": 2027,
+          "cgpa": 7.4,
+          "preferred_location": "Mumbai",
+          "available_from": "2027-01-04",
+          "internship_duration_months": 6,
+          "linkedin_url": null,
+          "github_url": null,
+          "skills": null,
+          "phone": "[redacted]",
+          "collection_status": "completed",
+          "attempt_count": 1,
+          "last_contacted_at": "2026-11-14T14:52:40+05:30",
+          "notes": "Completr AI outcome: completed. All mandatory fields are valid. All mandatory fields have been successfully collected and verified.",
+          "version": 3,
+          "updated_at": "2026-11-14T09:22:40+00:00"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "api_response",
+      "payload": {
+        "method": "GET",
+        "reason": "verify",
+        "body": {
+          "id": "c005",
+          "full_name": "Kabir Shah",
+          "email": "candidate.c005@example.com",
+          "college": "DJ Sanghvi, Mumbai",
+          "degree": "B.E.",
+          "branch": "Electronics and Telecommunication",
+          "graduation_year": 2027,
+          "cgpa": 7.4,
+          "preferred_location": "Mumbai",
+          "available_from": "2027-01-04",
+          "internship_duration_months": 6,
+          "linkedin_url": null,
+          "github_url": null,
+          "skills": null,
+          "phone": "[redacted]",
+          "collection_status": "completed",
+          "attempt_count": 1,
+          "last_contacted_at": "2026-11-14T14:52:40+05:30",
+          "notes": "Completr AI outcome: completed. All mandatory fields are valid. All mandatory fields have been successfully collected and verified.",
+          "version": 3,
+          "updated_at": "2026-11-14T09:22:40+00:00"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "outcome",
+      "payload": {
+        "outcome": "completed",
+        "note": "All mandatory fields have been successfully collected and verified.",
+        "refused_fields": [],
+        "optional_refusals_ignored": [],
+        "verify_mismatches": [],
+        "version": 3
+      }
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "end_conversation",
+        "args": {
+          "outcome": "completed",
+          "note": "All mandatory fields have been successfully collected and verified."
+        },
+        "result": {
+          "ok": true,
+          "outcome": "completed",
+          "saved_fields": [
+            "collection_status",
+            "last_contacted_at",
+            "notes"
+          ],
+          "verify_mismatches": [],
+          "verified": true
+        }
+      }
+    }
+  ],
+  "transcript": [
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "role": "agent",
+      "text": "Hello Kabir Shah. This is Completr AI. I am here to help you finish your ACME Corp internship application. Am I speaking with Kabir Shah?"
+    },
+    {
+      "at": "2026-11-14T14:52:05+05:30",
+      "role": "candidate",
+      "text": "yes"
+    },
+    {
+      "at": "2026-11-14T14:52:18+05:30",
+      "role": "agent",
+      "text": "Thanks! To keep moving forward with your ACME Corp internship application, could you please provide a valid email address? Also, what is your preferred work location?"
+    },
+    {
+      "at": "2026-11-14T14:52:18+05:30",
+      "role": "candidate",
+      "text": "My correct email is candidate.c005@example.com and I prefer Mumbai."
+    },
+    {
+      "at": "2026-11-14T14:52:40+05:30",
+      "role": "agent",
+      "text": "Thank you. Your internship application is complete, and the details are saved."
+    }
+  ],
+  "final_outcome": "completed",
+  "finished_at": "2026-11-14T14:52:40+05:30"
+}

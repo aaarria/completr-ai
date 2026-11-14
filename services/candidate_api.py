@@ -6,6 +6,8 @@ Public:
 Protected (Bearer token):
     GET /v1/candidates
     GET /v1/candidates/{candidate_id}
+    PATCH /v1/candidates/{candidate_id}
+    POST /v1/reset
 """
 
 from __future__ import annotations
@@ -37,6 +39,10 @@ class CandidateAPIError(Exception):
 
     Messages from this error never include the API key.
     """
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class CandidateAPI:
@@ -124,13 +130,82 @@ class CandidateAPI:
         safe_id = quote(candidate_id, safe="")
         return self._request("GET", f"/v1/candidates/{safe_id}", authenticated=True)
 
+    def update_candidate(
+        self,
+        candidate_id: str,
+        fields: dict[str, Any],
+        version: int | str,
+        idempotency_key: str,
+    ) -> Any:
+        """PATCH /v1/candidates/{id}.
+
+        Sends only the fields in `fields`. Read-only fields are removed so id,
+        phone, and version are never written. If-Match carries the version the
+        caller just read. Idempotency-Key makes a retry of this same change safe.
+        """
+        candidate_id = str(candidate_id).strip()
+        if not candidate_id:
+            raise CandidateAPIError("candidate_id is required.")
+        if version is None or str(version).strip() == "":
+            raise CandidateAPIError("A record version is required for If-Match.")
+        if not idempotency_key.strip():
+            raise CandidateAPIError("An Idempotency-Key is required for PATCH.")
+
+        body = {
+            key: value
+            for key, value in fields.items()
+            if key not in {"id", "phone", "version", "updated_at"}
+        }
+        if not body:
+            raise CandidateAPIError("PATCH body is empty. Nothing to update.")
+
+        path = f"/v1/candidates/{quote(candidate_id, safe='')}"
+        headers = {
+            "Content-Type": "application/json",
+            "If-Match": f'"{version}"',
+            "Idempotency-Key": idempotency_key,
+        }
+        try:
+            return self._request(
+                "PATCH",
+                path,
+                authenticated=True,
+                json_body=body,
+                extra_headers=headers,
+            )
+        except CandidateAPIError as exc:
+            # Some gateways describe a quoted etag as invalid. Retry once
+            # without quotes only when the write was rejected before it applied.
+            if exc.status_code not in {400, 422} or "if-match" not in str(exc).lower():
+                raise
+            headers["If-Match"] = str(version)
+            headers["Idempotency-Key"] = f"{idempotency_key}-etag"
+            return self._request(
+                "PATCH",
+                path,
+                authenticated=True,
+                json_body=body,
+                extra_headers=headers,
+            )
+
+    def reset_workspace(self) -> Any:
+        """POST /v1/reset. Restores this key's workspace to the original seed data."""
+        return self._request("POST", "/v1/reset", authenticated=True)
+
     def close(self) -> None:
         """Close the underlying HTTP session."""
         self._session.close()
 
-    def _request(self, method: str, path: str, authenticated: bool) -> Any:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        authenticated: bool,
+        json_body: dict[str, Any] | None = None,
+        extra_headers: dict[str, str] | None = None,
+    ) -> Any:
         """Perform one HTTP call and return parsed JSON."""
-        headers: dict[str, str] = {}
+        headers: dict[str, str] = dict(extra_headers or {})
         if authenticated:
             if not self._api_key:
                 raise CandidateAPIError(
@@ -146,6 +221,7 @@ class CandidateAPI:
                 method,
                 url,
                 headers=headers,
+                json=json_body,
                 timeout=self.timeout,
             )
             response.raise_for_status()
@@ -158,7 +234,11 @@ class CandidateAPI:
                 f"Could not connect to the Candidate Database API ({method} {path})."
             ) from exc
         except requests.HTTPError as exc:
-            raise CandidateAPIError(self._http_error_message(method, path, exc)) from exc
+            status = exc.response.status_code if exc.response is not None else None
+            raise CandidateAPIError(
+                self._http_error_message(method, path, exc),
+                status_code=status,
+            ) from exc
         except requests.RequestException as exc:
             raise CandidateAPIError(f"{method} {path} failed before a response was received.") from exc
 

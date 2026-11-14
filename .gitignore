@@ -26,9 +26,7 @@ dist/
 .coverage
 htmlcov/
 
-# Local run output
-runs/*
-!runs/.gitkeep
+# Sample conversations in runs/ are part of the submission.
 
 # Editors and OS
 .idea/

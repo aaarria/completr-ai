@@ -1,8 +1,12 @@
-"""CandidateIQ entry point.
+"""Completr AI.
 
-Checks that .env loaded, calls the live Candidate Database API, and can list
-candidate ids with their collection statuses. It does not print API keys or
-profile fields.
+Run a live completion session:
+
+    python main.py --candidate-id <id>
+
+List ids without profile details:
+
+    python main.py candidates
 """
 
 from __future__ import annotations
@@ -16,29 +20,36 @@ from services.candidate_api import CandidateAPI, CandidateAPIError
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Check the Prodigal Candidate Database API connection."
+        description="Completr AI: finish an internship application by conversation."
+    )
+    parser.add_argument(
+        "--candidate-id",
+        dest="candidate_id",
+        help="Run the agent for this candidate id from the live API.",
     )
     parser.add_argument(
         "command",
         nargs="?",
         choices=("schema", "candidates"),
-        default="candidates",
-        help=(
-            "schema: call GET /v1/schema. "
-            "candidates (default): list each candidate id and collection_status."
-        ),
+        help="schema checks GET /v1/schema. candidates lists id and collection_status.",
     )
     args = parser.parse_args(argv)
 
+    if args.candidate_id:
+        from agent.conversation import run_agent
+
+        return run_agent(args.candidate_id)
+
+    command = args.command or "candidates"
     api: CandidateAPI | None = None
     try:
         api = CandidateAPI()
         _print_env_status(api)
-        if args.command == "schema":
+        if command == "schema":
             _print_schema(api.get_schema())
             return 0
         _print_schema(api.get_schema())
-        print()
+        print(flush=True)
         return _print_candidates(api)
     except CandidateAPIError as exc:
         print(f"API error: {exc}", file=sys.stderr, flush=True)
@@ -63,7 +74,6 @@ def _print_schema(schema: Any) -> None:
     if not isinstance(schema, dict):
         print(f"Schema response type: {type(schema).__name__}", flush=True)
         return
-
     statuses = schema.get("collection_statuses")
     mandatory = schema.get("mandatory_fields")
     if isinstance(statuses, list):
@@ -75,8 +85,7 @@ def _print_schema(schema: Any) -> None:
 def _print_candidates(api: CandidateAPI) -> int:
     if not api.has_api_key():
         print(
-            "Cannot call GET /v1/candidates: PRODIGAL_API_KEY is empty. "
-            "Paste your personal key into .env and run this again.",
+            "Cannot call GET /v1/candidates: PRODIGAL_API_KEY is empty.",
             file=sys.stderr,
             flush=True,
         )
