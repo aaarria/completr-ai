@@ -1,0 +1,277 @@
+{
+  "product": "Completr AI",
+  "candidate_id": "demo",
+  "started_at": "2026-11-14T16:11:54+05:30",
+  "events": [
+    {
+      "at": "2026-11-14T16:11:54+05:30",
+      "type": "decision",
+      "payload": {
+        "model": "gemini-3.5-flash-lite"
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:02+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "confirm_identity",
+        "args": {
+          "confirmed": true
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:02+05:30",
+      "type": "decision",
+      "payload": {
+        "identity_confirmed": true,
+        "note": ""
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:02+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "confirm_identity",
+        "args": {
+          "confirmed": true
+        },
+        "result": {
+          "ok": true,
+          "identity_confirmed": true,
+          "instruction": "Collect the fields that are not VALID. Do not ask for phone or for fields that are already VALID.",
+          "state": "Identity confirmed: yes\nProgress: 2/11 mandatory fields valid\nFields:\n- full_name: VALID | stored: Anika Rao\n- phone: VALID | read-only | do not ask for it and do not update it\n- email: MISSING\n- college: MISSING\n- degree: MISSING\n- branch: MISSING\n- graduation_year: MISSING\n- cgpa: MISSING\n- preferred_location: MISSING\n- available_from: MISSING\n- internship_duration_months: MISSING\n- linkedin_url: MISSING | optional\n- github_url: MISSING | optional\n- skills: MISSING | optional\nStill required: email, college, degree, branch, graduation_year, cgpa, preferred_location, available_from, internship_duration_months"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:12+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "quote": "anks",
+              "signal": "ambiguous",
+              "field": "email",
+              "value": "anks"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:12+05:30",
+      "type": "evidence",
+      "payload": {
+        "field": "email",
+        "value": "anks",
+        "quote": "anks",
+        "validation": "NEEDS_CLARIFICATION",
+        "decision": "clarification",
+        "normalized": null,
+        "reason": "The answer is ambiguous. Ask for one exact value.",
+        "signal": "ambiguous"
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:12+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "quote": "anks",
+              "signal": "ambiguous",
+              "field": "email",
+              "value": "anks"
+            }
+          ]
+        },
+        "result": {
+          "ok": true,
+          "results": [
+            {
+              "field": "email",
+              "status": "NEEDS_CLARIFICATION",
+              "reason": "The answer is ambiguous. Ask for one exact value.",
+              "stored": false
+            }
+          ],
+          "progress": "2/11",
+          "all_mandatory_valid": false,
+          "saved": false,
+          "instruction": "Ask only about: email, college, degree, branch, graduation_year, cgpa, preferred_location, available_from, internship_duration_months"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "decision",
+      "payload": {
+        "tool": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "quote": "anku",
+              "field": "email",
+              "value": "anku",
+              "signal": "ambiguous"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "evidence",
+      "payload": {
+        "field": "email",
+        "value": "anku",
+        "quote": "anku",
+        "validation": "NEEDS_CLARIFICATION",
+        "decision": "clarification",
+        "normalized": null,
+        "reason": "The answer is ambiguous. Ask for one exact value.",
+        "signal": "ambiguous"
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "database_update",
+      "payload": {
+        "method": "PATCH",
+        "path": "/v1/candidates/demo",
+        "if_match": 1,
+        "idempotency_key": "6637230b-a6e9-49c4-a5be-bfdfce86e9da",
+        "body": {
+          "collection_status": "needs_human",
+          "notes": "Completr AI outcome: needs_human. Remaining: email, college, degree, branch, graduation_year, cgpa, preferred_location, available_from, internship_duration_months. Could not resolve conflicting or ambiguous answers for: email Earlier notes: Local demonstration record. Not stored in Prodigal.",
+          "last_contacted_at": "2026-11-14T16:12:16+05:30",
+          "attempt_count": 1
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "api_response",
+      "payload": {
+        "ok": true,
+        "method": "PATCH",
+        "body": {
+          "id": "demo",
+          "version": 2,
+          "collection_status": "needs_human",
+          "attempt_count": 1,
+          "full_name": "Anika Rao",
+          "phone": "[redacted]",
+          "notes": "Completr AI outcome: needs_human. Remaining: email, college, degree, branch, graduation_year, cgpa, preferred_location, available_from, internship_duration_months. Could not resolve conflicting or ambiguous answers for: email Earlier notes: Local demonstration record. Not stored in Prodigal.",
+          "last_contacted_at": "2026-11-14T16:12:16+05:30"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "api_response",
+      "payload": {
+        "method": "GET",
+        "reason": "verify",
+        "body": {
+          "id": "demo",
+          "version": 2,
+          "collection_status": "needs_human",
+          "attempt_count": 1,
+          "full_name": "Anika Rao",
+          "phone": "[redacted]",
+          "notes": "Completr AI outcome: needs_human. Remaining: email, college, degree, branch, graduation_year, cgpa, preferred_location, available_from, internship_duration_months. Could not resolve conflicting or ambiguous answers for: email Earlier notes: Local demonstration record. Not stored in Prodigal.",
+          "last_contacted_at": "2026-11-14T16:12:16+05:30"
+        }
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "outcome",
+      "payload": {
+        "outcome": "needs_human",
+        "note": "Could not resolve conflicting or ambiguous answers for: email",
+        "refused_fields": [],
+        "optional_refusals_ignored": [],
+        "verify_mismatches": [],
+        "version": 2
+      }
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "type": "tool_call",
+      "payload": {
+        "name": "record_candidate_fields",
+        "args": {
+          "fields": [
+            {
+              "quote": "anku",
+              "field": "email",
+              "value": "anku",
+              "signal": "ambiguous"
+            }
+          ]
+        },
+        "result": {
+          "ok": false,
+          "results": [
+            {
+              "field": "email",
+              "status": "NEEDS_CLARIFICATION",
+              "reason": "The answer is ambiguous. Ask for one exact value.",
+              "stored": false,
+              "escalate": true
+            }
+          ],
+          "escalated": true,
+          "outcome": "needs_human",
+          "instruction": "Tell the candidate a person will follow up. Do not keep asking."
+        }
+      }
+    }
+  ],
+  "transcript": [
+    {
+      "at": "2026-11-14T16:11:54+05:30",
+      "role": "agent",
+      "text": "Hello Anika Rao. This is Completr AI. I am here to help you finish your ACME Corp internship application. Am I speaking with Anika Rao?"
+    },
+    {
+      "at": "2026-11-14T16:12:01+05:30",
+      "role": "candidate",
+      "text": "hi yes im her what happened"
+    },
+    {
+      "at": "2026-11-14T16:12:03+05:30",
+      "role": "agent",
+      "text": "Just getting your ACME Corp internship application completed! Could you please share your email address so we can continue?"
+    },
+    {
+      "at": "2026-11-14T16:12:11+05:30",
+      "role": "candidate",
+      "text": "anks"
+    },
+    {
+      "at": "2026-11-14T16:12:13+05:30",
+      "role": "agent",
+      "text": "Could you please provide your full email address?"
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "role": "candidate",
+      "text": "anku"
+    },
+    {
+      "at": "2026-11-14T16:12:16+05:30",
+      "role": "agent",
+      "text": "I will stop here and ask a person on the team to follow up."
+    }
+  ],
+  "final_outcome": "needs_human",
+  "finished_at": "2026-11-14T16:12:16+05:30"
+}

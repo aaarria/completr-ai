@@ -9,6 +9,7 @@ import json
 import os
 import threading
 from datetime import datetime
+from typing import Any
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from google.genai import types
 
 from agent.conversation import GeminiClient, GeminiError, _identity_answer
 from agent.session import Session
+from web.demo import DEMO_ID, LocalDemoAPI, initial_demo_record
 from services.audit_log import RUNS_DIR, AuditLog
 from services.candidate_api import CandidateAPI, CandidateAPIError, _candidate_records, load_project_env
 from services.validation import assess_record, progress_count
@@ -56,8 +58,11 @@ class Office:
         self.client: GeminiClient | None = None
         self.audit: AuditLog | None = None
         self.messages: list[dict[str, str]] = []
+        self.demo: LocalDemoAPI | None = None
 
     def start(self, candidate_id: str) -> dict:
+        if candidate_id == DEMO_ID:
+            return self._start_demo()
         with self.lock:
             self.close()
             _use_direct_connection()
@@ -84,23 +89,46 @@ class Office:
                 return _error("The candidate response did not include a record.")
             audit.event("api_response", {"method": "GET", "path": f"/v1/candidates/{candidate_id}", "body": record})
             audit.event("api_response", {"method": "GET", "path": "/v1/schema", "body": schema})
-            session = Session(api, record, audit)
-            self.api = api
-            self.session = session
-            self.audit = audit
-            self.messages = []
-            decision = session.begin()
-            if not decision.get("chat"):
-                if session.closing_line:
-                    self._say("agent", session.closing_line)
-                return self._payload()
-            greeting = session.greeting()
-            self._say("agent", greeting)
-            self.client = GeminiClient(gemini_key, session, audit)
-            self.client.contents.append(
-                types.Content(role="model", parts=[types.Part(text=greeting)])
-            )
+            return self._open_loaded(api, record, audit, gemini_key)
+
+    def _start_demo(self) -> dict:
+        with self.lock:
+            self.close()
+            load_project_env()
+            gemini_key = (os.getenv("GEMINI_API_KEY") or "").strip()
+            if not gemini_key:
+                return _error("GEMINI_API_KEY is missing from .env.")
+            if self.demo is None:
+                self.demo = LocalDemoAPI()
+            record = self.demo.get_candidate(DEMO_ID)
+            audit = AuditLog(DEMO_ID, [gemini_key])
+            return self._open_loaded(self.demo, record, audit, gemini_key)
+
+    def reset_demo(self) -> dict:
+        with self.lock:
+            if self.session is not None and self.session.candidate_id == DEMO_ID:
+                self.close()
+            self.demo = LocalDemoAPI(initial_demo_record())
+            return {"ok": True, "demo": _demo_public()}
+
+    def _open_loaded(self, api: Any, record: dict, audit: AuditLog, gemini_key: str) -> dict:
+        session = Session(api, record, audit)
+        self.api = api
+        self.session = session
+        self.audit = audit
+        self.messages = []
+        decision = session.begin()
+        if not decision.get("chat"):
+            if session.closing_line:
+                self._say("agent", session.closing_line)
             return self._payload()
+        greeting = session.greeting()
+        self._say("agent", greeting)
+        self.client = GeminiClient(gemini_key, session, audit)
+        self.client.contents.append(
+            types.Content(role="model", parts=[types.Part(text=greeting)])
+        )
+        return self._payload()
 
     def message(self, text: str) -> dict:
         with self.lock:
@@ -160,7 +188,7 @@ class Office:
     def close(self) -> None:
         if self.audit is not None and self.session is not None and self.session.outcome is None:
             self.audit.finish(None)
-        if self.api is not None:
+        if self.api is not None and self.api is not self.demo:
             self.api.close()
         self.api = None
         self.session = None
@@ -181,7 +209,9 @@ class Office:
 
     def _payload(self) -> dict:
         assert self.session is not None
-        return {"ok": True, "messages": self.messages, "state": self.session.snapshot()}
+        state = self.session.snapshot()
+        state["source"] = "demo" if self.session.candidate_id == DEMO_ID else "live"
+        return {"ok": True, "messages": self.messages, "state": state}
 
 
 OFFICE = Office()
@@ -233,6 +263,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/message":
             self._json(200, OFFICE.message(str(payload.get("text") or "")))
+            return
+        if path == "/api/demo/reset":
+            self._json(200, OFFICE.reset_demo())
             return
         self._json(404, {"ok": False, "error": "Not found."})
 
@@ -293,7 +326,28 @@ def _candidate_catalog() -> dict:
             }
         )
     rows.sort(key=lambda item: item["id"])
-    return {"ok": True, "total": len(rows), "counts": counts, "candidates": rows}
+    return {
+        "ok": True,
+        "total": len(rows),
+        "counts": counts,
+        "candidates": rows,
+        "demo": _demo_public(),
+    }
+
+
+def _demo_public() -> dict:
+    record = OFFICE.demo.record if OFFICE.demo is not None else initial_demo_record()
+    done, total = progress_count(assess_record(record))
+    return {
+        "id": DEMO_ID,
+        "name": str(record.get("full_name") or ""),
+        "college": str(record.get("college") or ""),
+        "collection_status": str(record.get("collection_status") or ""),
+        "done": done,
+        "total": total,
+        "last_contacted_at": str(record.get("last_contacted_at") or ""),
+        "source": "demo",
+    }
 
 
 def _activity_rows() -> list[dict]:

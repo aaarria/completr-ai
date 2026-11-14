@@ -30,56 +30,48 @@
     }
     button, input, select { font: inherit; }
     button { cursor: pointer; }
-    .app { display: grid; grid-template-columns: 248px 1fr; min-height: 100vh; }
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
     .sidebar {
       background: var(--card);
       border-right: 1px solid var(--line);
-      padding: 20px 16px;
+      padding: 28px 18px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 28px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
     }
-    .logo { width: 168px; height: auto; display: block; }
+    .logo { width: 156px; height: auto; display: block; }
     .product { margin: 0; }
-    .product strong { display: block; color: var(--blue); font-size: 16px; }
-    .product span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-    nav { display: flex; flex-direction: column; gap: 4px; }
+    .product strong { display: block; color: var(--blue); font-size: 15px; }
+    .product span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.4; }
+    nav { display: flex; flex-direction: column; gap: 2px; }
     nav button {
       text-align: left;
       background: transparent;
       border: 0;
-      border-left: 3px solid transparent;
+      border-radius: 8px;
       color: var(--navy);
       padding: 10px 12px;
-      border-radius: 0;
     }
-    nav button.active { background: #fff6f0; border-left-color: var(--orange); color: var(--orange); font-weight: 600; }
-    nav button:hover { background: #f7f9fb; }
+    nav button.active { background: #fff4ec; color: var(--orange); font-weight: 600; }
+    nav button:hover { background: #f6f8fa; }
     .content { min-width: 0; }
-    .top {
-      background: var(--navy);
-      color: white;
-      padding: 14px 28px;
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: center;
-    }
-    .top p { margin: 2px 0 0; color: #c5d4de; font-size: 13px; }
-    .page { padding: 24px 28px 40px; }
-    h1 { margin: 0 0 6px; color: var(--blue); font-size: 28px; font-weight: 700; }
-    .lede { margin: 0 0 18px; color: var(--muted); max-width: 680px; }
+    .page { padding: 36px 40px 56px; max-width: 1080px; }
+    h1 { margin: 0 0 4px; color: var(--blue); font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+    .lede { margin: 0 0 22px; color: var(--muted); max-width: 520px; line-height: 1.5; }
     .cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      gap: 14px;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--line);
-      padding: 14px 16px;
+      border-radius: 10px;
+      padding: 16px 18px 18px;
       text-align: left;
-      box-shadow: 0 1px 2px rgba(6, 35, 51, 0.04);
     }
     .card:hover { border-color: #c9d5de; }
     .card .count { display: block; font-size: 28px; font-weight: 700; color: var(--navy); margin-top: 8px; }
@@ -91,16 +83,19 @@
     input[type="search"], select {
       border: 1px solid var(--line);
       background: white;
-      padding: 8px 10px;
-      min-width: 180px;
+      border-radius: 8px;
+      padding: 9px 12px;
+      min-width: 200px;
     }
-    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
-    th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: 0.02em; }
+    table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; background: #fafbfc; }
+    tr:last-child td { border-bottom: 0; }
     tr:hover td { background: #fafbfc; }
     .status {
       display: inline-block;
-      padding: 2px 8px;
+      padding: 3px 8px;
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
       background: #eef2f5;
@@ -112,41 +107,47 @@
     .status.no_answer { background: #eef2f5; color: var(--muted); }
     .status.refused { background: #f8e8e8; color: var(--red); }
     .status.needs_human { background: #f8efe2; color: var(--amber); }
-    .bar { height: 6px; background: #e6eef2; width: 92px; }
+    .bar { height: 6px; background: #e6eef2; width: 84px; border-radius: 99px; overflow: hidden; }
     .bar span { display: block; height: 100%; background: var(--orange); }
+    .panel .bar { width: 100%; margin: 8px 0 14px; }
     .action {
       background: var(--orange);
       color: white;
       border: 0;
-      padding: 7px 12px;
+      border-radius: 8px;
+      padding: 8px 14px;
     }
     .action.secondary { background: var(--blue); }
     .action:disabled { opacity: 0.55; cursor: default; }
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-      gap: 16px;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 18px;
       align-items: start;
     }
-    .panel { background: white; border: 1px solid var(--line); padding: 16px; }
-    .panel h2 { margin: 0 0 12px; font-size: 16px; color: var(--blue); }
+    .panel { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 18px 18px 16px; }
+    .panel h2 { margin: 18px 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; }
+    .panel h2:first-child { margin-top: 0; font-size: 16px; color: var(--blue); letter-spacing: 0; }
     #log {
-      min-height: 360px;
-      max-height: 520px;
+      min-height: 280px;
+      max-height: 480px;
       overflow: auto;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
+      padding: 4px 2px 8px;
     }
-    .bubble { max-width: 82%; padding: 10px 12px; white-space: pre-wrap; }
+    .bubble { max-width: 78%; padding: 10px 14px; white-space: pre-wrap; border-radius: 12px; line-height: 1.45; }
     .agent { background: #fff6f0; align-self: flex-start; }
     .candidate { background: #e8f1f8; align-self: flex-end; }
     .typing { color: var(--muted); font-style: italic; }
     .stamp { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
-    .composer { display: flex; gap: 8px; margin-top: 12px; }
-    textarea { flex: 1; border: 1px solid var(--line); padding: 8px; resize: vertical; }
-    .reason { color: var(--muted); font-size: 13px; min-height: 1.2em; }
-    .error { color: var(--red); min-height: 1.2em; }
+    .composer { display: flex; gap: 8px; margin-top: 8px; align-items: flex-end; }
+    textarea { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
+    .reason, .error, #outcome { margin: 6px 0; font-size: 13px; }
+    .reason:empty, .error:empty, #outcome:empty, #progress:empty { display: none; }
+    .reason { color: var(--muted); }
+    .error { color: var(--red); }
     .profile p { margin: 4px 0; color: var(--muted); font-size: 14px; }
     .banner { padding: 8px 10px; margin: 8px 0; font-size: 13px; background: #fff6f0; }
     .banner.summary { background: #e8f1f8; }
@@ -162,13 +163,23 @@
     .VALID { color: var(--green); font-weight: 600; }
     .MISSING, .INVALID, .NEEDS_CLARIFICATION { color: var(--amber); font-weight: 600; }
     .empty, .loading { color: var(--muted); padding: 24px; background: white; border: 1px solid var(--line); }
-    .back { background: transparent; border: 1px solid var(--line); padding: 7px 12px; margin-bottom: 12px; }
+    .back { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; margin-bottom: 14px; color: var(--navy); }
+    .demo {
+      margin-top: 22px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .demo strong { color: var(--orange); }
+    .demo p { margin: 6px 0 10px; color: var(--muted); font-size: 14px; }
+    .flag { display: inline-block; margin-bottom: 8px; padding: 2px 8px; background: #fff1e8; color: #9a4d16; font-size: 12px; font-weight: 600; }
     @media (max-width: 900px) {
       .app { grid-template-columns: 1fr; }
-      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); gap: 16px; padding: 16px; }
       nav { flex-direction: row; flex-wrap: wrap; }
       .workspace { grid-template-columns: 1fr; }
-      .page { padding: 16px; }
+      .page { padding: 20px 16px 32px; }
       table { display: block; overflow-x: auto; }
     }
   </style>
@@ -188,21 +199,16 @@
       </nav>
     </aside>
     <div class="content">
-      <header class="top">
-        <div>
-          <strong>Completr AI</strong>
-          <p>An AI-powered application completion platform built for Prodigal Technologies.</p>
-        </div>
-      </header>
       <div class="page">
         <section id="dashboard">
           <h1>Dashboard</h1>
-          <p class="lede">Application completion for the Prodigal candidate workspace. Counts come from the live Candidate Database.</p>
+          <p class="lede">Live counts from the Candidate Database.</p>
           <div id="dash-body" class="loading">Loading candidates…</div>
+          <div id="demo-dash"></div>
         </section>
         <section id="candidates" hidden>
           <h1>Candidates</h1>
-          <p class="lede">Search and filter the live workspace. Phone numbers are not shown.</p>
+          <p class="lede">Search the live workspace. Phone numbers stay hidden.</p>
           <div class="toolbar">
             <input id="search" type="search" placeholder="Search name, id, or college" />
             <select id="filter">
@@ -215,11 +221,12 @@
               <option value="needs_human">Needs human</option>
             </select>
           </div>
+          <div id="demo-table"></div>
           <div id="table-body" class="loading">Loading candidates…</div>
         </section>
         <section id="activity" hidden>
           <h1>Activity</h1>
-          <p class="lede">Local audit files. Messages and phone numbers stay in the files and are not listed here.</p>
+          <p class="lede">Session files only. Messages stay in the files.</p>
           <div id="activity-body" class="loading">Loading activity…</div>
         </section>
         <section id="workspace" hidden>
@@ -450,7 +457,53 @@
         catalog = { ok: false, error: "Could not reach the local site." };
       }
       renderDashboard();
+      renderDemo();
       renderTable();
+    }
+    function renderDemo() {
+      const demo = catalog && catalog.demo;
+      for (const id of ["demo-dash", "demo-table"]) {
+        const host = document.getElementById(id);
+        host.replaceChildren();
+        if (!demo) continue;
+        const box = document.createElement("div");
+        box.className = "demo";
+        const flag = document.createElement("div");
+        flag.className = "flag";
+        flag.textContent = "Local demo · not stored in Prodigal";
+        const title = document.createElement("strong");
+        title.textContent = (demo.name || "Demo candidate") + " · " + demo.id;
+        const copy = document.createElement("p");
+        copy.textContent = "Status " + label(demo.collection_status) + ". Mandatory fields " + demo.done + "/" + demo.total + ". This record never leaves this computer.";
+        const start = document.createElement("button");
+        start.type = "button";
+        start.className = "action";
+        start.textContent = actionFor(demo.collection_status);
+        start.addEventListener("click", () => openCandidate(demo.id));
+        const reset = document.createElement("button");
+        reset.type = "button";
+        reset.className = "action secondary";
+        reset.style.marginLeft = "8px";
+        reset.textContent = "Reset local demo";
+        reset.addEventListener("click", resetDemo);
+        box.append(flag, title, copy, start, reset);
+        host.appendChild(box);
+      }
+    }
+    async function resetDemo() {
+      if (!window.confirm("Reset the local demo candidate? Live Prodigal records are not changed.")) return;
+      try {
+        const data = await postJson("/api/demo/reset", {});
+        if (!data.ok) {
+          window.alert(data.error || "The demo could not be reset.");
+          return;
+        }
+        if (catalog) catalog.demo = data.demo;
+        renderDemo();
+        show("candidates");
+      } catch (err) {
+        window.alert("The demo could not be reset.");
+      }
     }
     function addBubble(role, text, at) {
       const log = document.getElementById("log");
@@ -486,6 +539,12 @@
       const status = document.createElement("p");
       status.textContent = "Collection status: " + (state.collection_status || "unknown");
       profile.append(title, identity, status);
+      if (state.source === "demo") {
+        const flag = document.createElement("p");
+        flag.className = "flag";
+        flag.textContent = "Local demo · not stored in Prodigal";
+        profile.prepend(flag);
+      }
       document.getElementById("progress").textContent = "Progress: " + done + "/" + total + " mandatory fields valid";
       document.getElementById("fill").style.width = (total ? (done / total) * 100 : 0) + "%";
       document.getElementById("outcome").textContent = state.outcome ? "Outcome: " + state.outcome : "";
